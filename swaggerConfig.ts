@@ -15,7 +15,7 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: config.hostedUrl,
+        url: config.baseUrl,
         description: 'Development server',
       },
     ],
