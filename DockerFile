@@ -1,0 +1,39 @@
+# Set build argument for Node version (default is 18)
+ARG NODE_VERSION=18
+
+# Stage 1: Build Stage
+FROM node:${NODE_VERSION}-alpine as build
+
+# Set working directory
+WORKDIR /
+
+# Copy package.json and package-lock.json
+COPY package*.json /
+
+# Install dependencies
+RUN npm install
+
+# Copy all source files
+COPY . /
+
+# Build TypeScript files
+RUN npm run build
+
+# Stage 2: Runtime Stage
+FROM node:${NODE_VERSION}-alpine
+
+# Set working directory
+WORKDIR /
+
+# Copy only necessary files from the build stage
+COPY --from=build /dist /dist
+COPY --from=build /package*.json /
+
+# Install production dependencies only
+RUN npm install --only=production
+
+# Expose the server port
+EXPOSE 5500
+
+# Set default command to run the server
+CMD ["node", "dist/server.js"]
