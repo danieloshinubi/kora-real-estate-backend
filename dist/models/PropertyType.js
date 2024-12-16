@@ -32,19 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.router = void 0;
-const express_1 = __importDefault(require("express"));
-const authController = __importStar(require("../controllers/authController"));
-const router = express_1.default.Router();
-exports.router = router;
-const authRouter = express_1.default.Router();
-authRouter.get('/verify-account/:token', authController.verifyAccount);
-authRouter.post('/signup', authController.handleNewUser);
-authRouter.post('/login', authController.handleLogin);
-authRouter.post('/forgotpassword', authController.forgotPassword);
-authRouter.post('/resetpassword', authController.resetPassword);
-router.use('/user', authRouter);
+const mongoose_1 = __importStar(require("mongoose"));
+const PropertyTypeSchema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+}, { timestamps: true });
+const PropertyType = mongoose_1.default.model('PropertyType', PropertyTypeSchema);
+exports.default = PropertyType;

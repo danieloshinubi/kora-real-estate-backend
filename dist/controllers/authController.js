@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleLogin = exports.verifyAccount = exports.handleNewUser = void 0;
+exports.resetPassword = exports.forgotPassword = exports.handleLogin = exports.verifyAccount = exports.handleNewUser = void 0;
 const User_1 = __importDefault(require("../models/User"));
 const roles_list_1 = __importDefault(require("../config/roles_list"));
 const node_1 = require("@novu/node");
@@ -144,19 +144,6 @@ const handleNewUser = async (req, res) => {
         });
         // Save user to the database
         const savedUser = await newUser.save();
-        // Generate a verification token
-        const token = jsonwebtoken_1.default.sign({ id: savedUser._id }, process.env.VERIFY_ACCOUNT_SECRET, { expiresIn: '2m' });
-        const verificationLink = `${process.env.BACKEND_URL}/auth/user/verify-account/${token}`;
-        // Send LINK to the user's email
-        await novuRoot.trigger('kora-verify-account', {
-            to: {
-                subscriberId: savedUser._id.toString(),
-                email: savedUser.email,
-            },
-            payload: {
-                LINK: verificationLink,
-            },
-        });
         res.status(201).json({ user: savedUser, message: 'Sign-up completed' });
     }
     catch (error) {
@@ -384,3 +371,190 @@ const handleLogin = async (req, res) => {
     }
 };
 exports.handleLogin = handleLogin;
+/**
+ * @swagger
+ * /auth/user/forgotpassword:
+ *   post:
+ *     summary: Request a password reset OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: password reset token sent
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ *                 error:
+ *                   type: string
+ *                   example: An unexpected error occurred
+ */
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        // check if user already exists
+        const user = await User_1.default.findOne({ email });
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        const resetToken = Math.floor(10000 + Math.random() * 90000).toString();
+        user.otp = resetToken;
+        await user.save();
+        await novuRoot.trigger('kora-forgot-password', {
+            to: {
+                subscriberId: user._id.toString(),
+                email: email,
+            },
+            payload: {
+                OTP: resetToken,
+            },
+        });
+        res.status(200).json({ message: 'password reset token sent' });
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
+    }
+};
+exports.forgotPassword = forgotPassword;
+/**
+ * @swagger
+ * /auth/user/resetpassword:
+ *   post:
+ *     summary: Reset a user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               otp:
+ *                 type: string
+ *                 example: 12345
+ *               newPassword:
+ *                 type: string
+ *                 example: NewPassword123!
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password has been changed successfully.
+ *       400:
+ *         description: Invalid email or OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid email
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ *                 error:
+ *                   type: string
+ *                   example: An unexpected error occurred
+ */
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    try {
+        const user = await User_1.default.findOne({
+            email,
+        });
+        if (!user) {
+            res.status(400).json({ message: 'Invalid email' });
+            return;
+        }
+        if (otp !== user.otp) {
+            res.status(400).json({ message: 'Invalid otp' });
+        }
+        // Hash the new password
+        const hashedPassword = await bcryptjs_1.default.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.otp = null;
+        await user.save();
+        res.json({ message: 'Password has been changed successfully.' });
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
+    }
+};
+exports.resetPassword = resetPassword;

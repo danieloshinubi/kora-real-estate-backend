@@ -38,13 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = __importDefault(require("express"));
-const authController = __importStar(require("../controllers/authController"));
+const profileController = __importStar(require("../controllers/profileController"));
 const router = express_1.default.Router();
 exports.router = router;
-const authRouter = express_1.default.Router();
-authRouter.get('/verify-account/:token', authController.verifyAccount);
-authRouter.post('/signup', authController.handleNewUser);
-authRouter.post('/login', authController.handleLogin);
-authRouter.post('/forgotpassword', authController.forgotPassword);
-authRouter.post('/resetpassword', authController.resetPassword);
-router.use('/user', authRouter);
+router.post('/', profileController.createProfile);
+router.get('/:userId', profileController.getProfileByUserId);

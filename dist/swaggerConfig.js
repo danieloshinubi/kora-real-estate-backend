@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const config = {
-    hostedUrl: '',
+    hostedUrl: 'https://kora-service.onrender.com/',
     baseUrl: 'http://localhost:5500',
 };
 const options = {
@@ -23,7 +23,7 @@ const options = {
             },
         ],
     },
-    apis: ['./controllers/*.ts'],
+    apis: ['./dist/controllers/*.js'],
 };
 const swaggerSpec = (0, swagger_jsdoc_1.default)(options);
 exports.default = swaggerSpec;
