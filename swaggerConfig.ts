@@ -1,7 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
 const config = {
-  hostedUrl: '',
+  hostedUrl: 'https://kora-service.onrender.com/',
   baseUrl: 'http://localhost:5500',
 };
 
@@ -15,7 +15,7 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: config.baseUrl,
+        url: config.hostedUrl,
         description: 'Development server',
       },
     ],
