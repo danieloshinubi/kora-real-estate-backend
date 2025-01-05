@@ -12,7 +12,7 @@ const migrations_1 = __importDefault(require("./migrations"));
 const main_1 = require("./routes/main");
 const corsOptions_1 = __importDefault(require("./config/corsOptions"));
 const app = (0, express_1.default)();
-const server = http_1.default.createServer(app); // Create HTTP server
+const server = http_1.default.createServer(app);
 // Setup CORS and JSON parsing
 app.use((0, cors_1.default)(corsOptions_1.default));
 app.use(express_1.default.json());

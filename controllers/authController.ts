@@ -348,11 +348,16 @@ const handleLogin = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      res.status(400).json({ message: 'Email and password are required' });
+      return;
+    }
+
     // Find the user by email
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(400).json({ message: 'Invalid email or password' });
       return;
     }
 
@@ -371,7 +376,7 @@ const handleLogin = async (req: Request, res: Response): Promise<void> => {
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(400).json({ message: 'Invalid email or password' });
       return;
     }
 

@@ -319,10 +319,14 @@ exports.verifyAccount = verifyAccount;
 const handleLogin = async (req, res) => {
     const { email, password } = req.body;
     try {
+        if (!email || !password) {
+            res.status(400).json({ message: 'Email and password are required' });
+            return;
+        }
         // Find the user by email
         const user = await User_1.default.findOne({ email });
         if (!user) {
-            res.status(401).json({ message: 'Invalid email or password' });
+            res.status(400).json({ message: 'Invalid email or password' });
             return;
         }
         // Check if account is verified
@@ -338,7 +342,7 @@ const handleLogin = async (req, res) => {
         // Validate password
         const isPasswordValid = await bcryptjs_1.default.compare(password, user.password);
         if (!isPasswordValid) {
-            res.status(401).json({ message: 'Invalid email or password' });
+            res.status(400).json({ message: 'Invalid email or password' });
             return;
         }
         // Generate a token

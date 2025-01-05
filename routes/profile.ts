@@ -5,5 +5,6 @@ const router: Router = express.Router();
 
 router.post('/', profileController.createProfile);
 router.get('/:userId', profileController.getProfileByUserId);
+router.patch('/:userId', profileController.updateProfile);
 
 export { router };

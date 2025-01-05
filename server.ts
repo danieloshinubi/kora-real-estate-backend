@@ -8,7 +8,7 @@ import { routes } from './routes/main';
 import corsOptions from './config/corsOptions';
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server
+const server = http.createServer(app);
 
 // Setup CORS and JSON parsing
 app.use(cors(corsOptions));
