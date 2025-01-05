@@ -12,6 +12,10 @@ interface JWTDecoded {
 
 // Extend the Express Request interface to include custom properties
 interface CustomRequest extends Request {
+  user?: {
+    userId: string;
+    roles: string[];
+  };
   roles?: string[];
   userId?: string;
 }
@@ -38,6 +42,12 @@ const verifyJWT = (
       const { UserInfo } = decoded as JWTDecoded;
       req.roles = UserInfo.roles;
       req.userId = UserInfo.id;
+
+      req.user = {
+        userId: UserInfo.id,
+        roles: UserInfo.roles,
+      } as any;
+
       next();
     }
   );

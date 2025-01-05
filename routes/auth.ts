@@ -10,6 +10,7 @@ authRouter.post('/signup', authController.handleNewUser);
 authRouter.post('/login', authController.handleLogin);
 authRouter.post('/forgotpassword', authController.forgotPassword);
 authRouter.post('/resetpassword', authController.resetPassword);
+authRouter.patch('/changepassword', authController.changePassword);
 
 router.use('/user', authRouter);
 export { router };

@@ -1,13 +1,11 @@
-'use strict';
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-Object.defineProperty(exports, '__esModule', { value: true });
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.getUserById = exports.getAllUsers = void 0;
-const User_1 = __importDefault(require('../models/User'));
-const Profile_1 = __importDefault(require('../models/Profile'));
+const User_1 = __importDefault(require("../models/User"));
+const Profile_1 = __importDefault(require("../models/Profile"));
 /**
  * @swagger
  * tags:
@@ -80,24 +78,26 @@ const Profile_1 = __importDefault(require('../models/Profile'));
  *                   example: An unexpected error occurred
  */
 const getAllUsers = async (req, res) => {
-  try {
-    const users = await User_1.default.find();
-    if (!users || users.length === 0) {
-      res.status(404).json({ message: 'No User found', status: 404 });
-      return;
+    try {
+        const users = await User_1.default.find();
+        if (!users || users.length === 0) {
+            res.status(404).json({ message: 'No User found', status: 404 });
+            return;
+        }
+        res.status(200).json(users);
     }
-    res.status(200).json(users);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-  }
 };
 exports.getAllUsers = getAllUsers;
 /**
@@ -174,25 +174,27 @@ exports.getAllUsers = getAllUsers;
  *                   example: An unexpected error occurred
  */
 const getUserById = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const user = await User_1.default.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found', status: 404 });
-      return;
+    const { userId } = req.params;
+    try {
+        const user = await User_1.default.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: 'User not found', status: 404 });
+            return;
+        }
+        res.status(200).json({ user });
     }
-    res.status(200).json({ user });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-  }
 };
 exports.getUserById = getUserById;
 /**
@@ -250,32 +252,34 @@ exports.getUserById = getUserById;
  *                   example: An unexpected error occurred
  */
 const deleteUser = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    // Find the user by ID
-    const user = await User_1.default.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found', status: 404 });
-      return;
+    const { userId } = req.params;
+    try {
+        // Find the user by ID
+        const user = await User_1.default.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: 'User not found', status: 404 });
+            return;
+        }
+        // Find and delete the associated profile
+        const profile = await Profile_1.default.findOneAndDelete({ user: userId });
+        // Delete the user
+        await User_1.default.findByIdAndDelete(userId);
+        res.status(200).json({
+            message: 'User and associated profile deleted successfully',
+            status: 200,
+        });
     }
-    // Find and delete the associated profile
-    const profile = await Profile_1.default.findOneAndDelete({ user: userId });
-    // Delete the user
-    await User_1.default.findByIdAndDelete(userId);
-    res.status(200).json({
-      message: 'User and associated profile deleted successfully',
-      status: 200,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-  }
 };
 exports.deleteUser = deleteUser;

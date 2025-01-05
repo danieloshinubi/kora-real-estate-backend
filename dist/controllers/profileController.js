@@ -1,18 +1,13 @@
-'use strict';
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.updateProfile =
-  exports.getProfileByUserId =
-  exports.createProfile =
-    void 0;
-const Profile_1 = __importDefault(require('../models/Profile'));
-const User_1 = __importDefault(require('../models/User'));
-const node_1 = require('@novu/node');
-const jsonwebtoken_1 = __importDefault(require('jsonwebtoken'));
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateProfile = exports.getProfileByUserId = exports.createProfile = void 0;
+const Profile_1 = __importDefault(require("../models/Profile"));
+const User_1 = __importDefault(require("../models/User"));
+const node_1 = require("@novu/node");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 /**
  * @swagger
  * tags:
@@ -21,7 +16,7 @@ const jsonwebtoken_1 = __importDefault(require('jsonwebtoken'));
  */
 const novuApiKey = process.env.NOVU_API_KEY;
 if (!novuApiKey) {
-  throw new Error('Novu API key is not defined');
+    throw new Error('Novu API key is not defined');
 }
 const novuRoot = new node_1.Novu(novuApiKey);
 /**
@@ -153,76 +148,71 @@ const novuRoot = new node_1.Novu(novuApiKey);
  *                   example: "An unexpected error occurred"
  */
 const createProfile = async (req, res) => {
-  const { user, propertyType, bedrooms, pets, minPrice, maxPrice, location } =
-    req.body;
-  try {
-    if (
-      !user ||
-      !propertyType ||
-      !bedrooms ||
-      !pets ||
-      !minPrice ||
-      !maxPrice ||
-      !location
-    ) {
-      res.status(400).json({ message: 'All fields are required' });
-      return;
+    const { user, propertyType, bedrooms, pets, minPrice, maxPrice, location } = req.body;
+    try {
+        if (!user ||
+            !propertyType ||
+            !bedrooms ||
+            !pets ||
+            !minPrice ||
+            !maxPrice ||
+            !location) {
+            res.status(400).json({ message: 'All fields are required' });
+            return;
+        }
+        const existingProfile = await Profile_1.default.findOne({ user });
+        if (existingProfile) {
+            res.status(409).json({ message: 'User profile already exists' });
+            return;
+        }
+        // Create a new profile
+        const newProfile = new Profile_1.default({
+            user,
+            propertyType,
+            bedrooms,
+            pets,
+            minPrice,
+            maxPrice,
+            location,
+        });
+        // Save the profile to the database
+        const savedProfile = await newProfile.save();
+        const foundUser = await User_1.default.findById({ _id: user });
+        if (!foundUser) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+        // Generate a verification token
+        const token = jsonwebtoken_1.default.sign({ id: foundUser._id }, process.env.VERIFY_ACCOUNT_SECRET, { expiresIn: '2m' });
+        const verificationLink = `${process.env.BACKEND_URL}/auth/user/verify-account/${token}`;
+        // Send LINK to the user's email
+        await novuRoot.trigger('kora-verify-account', {
+            to: {
+                subscriberId: foundUser._id.toString(),
+                email: foundUser.email,
+            },
+            payload: {
+                LINK: verificationLink,
+            },
+        });
+        // Return the created profile
+        res.status(201).json({
+            message: 'Profile created successfully',
+            profile: savedProfile,
+        });
     }
-    const existingProfile = await Profile_1.default.findOne({ user });
-    if (existingProfile) {
-      res.status(409).json({ message: 'User profile already exists' });
-      return;
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-    // Create a new profile
-    const newProfile = new Profile_1.default({
-      user,
-      propertyType,
-      bedrooms,
-      pets,
-      minPrice,
-      maxPrice,
-      location,
-    });
-    // Save the profile to the database
-    const savedProfile = await newProfile.save();
-    const foundUser = await User_1.default.findById({ _id: user });
-    if (!foundUser) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-    // Generate a verification token
-    const token = jsonwebtoken_1.default.sign(
-      { id: foundUser._id },
-      process.env.VERIFY_ACCOUNT_SECRET,
-      { expiresIn: '2m' }
-    );
-    const verificationLink = `${process.env.BACKEND_URL}/auth/user/verify-account/${token}`;
-    // Send LINK to the user's email
-    await novuRoot.trigger('kora-verify-account', {
-      to: {
-        subscriberId: foundUser._id.toString(),
-        email: foundUser.email,
-      },
-      payload: {
-        LINK: verificationLink,
-      },
-    });
-    // Return the created profile
-    res.status(201).json({
-      message: 'Profile created successfully',
-      profile: savedProfile,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
-    }
-  }
 };
 exports.createProfile = createProfile;
 /**
@@ -304,25 +294,27 @@ exports.createProfile = createProfile;
  *                   example: "An unexpected error occurred"
  */
 const getProfileByUserId = async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const profile = await Profile_1.default.findOne({ user: userId });
-    if (!profile) {
-      res.status(404).json({ message: 'Profile not found' });
-      return;
+    const { userId } = req.params;
+    try {
+        const profile = await Profile_1.default.findOne({ user: userId });
+        if (!profile) {
+            res.status(404).json({ message: 'Profile not found' });
+            return;
+        }
+        res.status(200).json({ profile });
     }
-    res.status(200).json({ profile });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-  }
 };
 exports.getProfileByUserId = getProfileByUserId;
 /**
@@ -434,54 +426,54 @@ exports.getProfileByUserId = getProfileByUserId;
  *                   example: "An unexpected error occurred"
  */
 const updateProfile = async (req, res) => {
-  const { userId } = req.params;
-  const updates = req.body;
-  const validFields = [
-    'propertyType',
-    'bedrooms',
-    'pets',
-    'minPrice',
-    'maxPrice',
-    'location',
-  ];
-  try {
-    // Check if the profile exists
-    const profile = await Profile_1.default.findOne({ user: userId });
-    if (!profile) {
-      res.status(404).json({ message: 'Profile not found' });
-      return;
+    const { userId } = req.params;
+    const updates = req.body;
+    const validFields = [
+        'propertyType',
+        'bedrooms',
+        'pets',
+        'minPrice',
+        'maxPrice',
+        'location',
+    ];
+    try {
+        // Check if the profile exists
+        const profile = await Profile_1.default.findOne({ user: userId });
+        if (!profile) {
+            res.status(404).json({ message: 'Profile not found' });
+            return;
+        }
+        // Validate updates fields
+        const invalidFields = Object.keys(updates).filter((key) => !validFields.includes(key));
+        if (invalidFields.length > 0) {
+            res.status(400).json({
+                message: 'Invalid field(s) in update request',
+                invalidFields,
+            });
+            return;
+        }
+        // Update only the fields provided in the request
+        Object.keys(updates).forEach((key) => {
+            profile[key] = updates[key];
+        });
+        // Save the updated profile
+        const updatedProfile = await profile.save();
+        res.status(200).json({
+            message: 'Profile updated successfully',
+            profile: updatedProfile,
+        });
     }
-    // Validate updates fields
-    const invalidFields = Object.keys(updates).filter(
-      (key) => !validFields.includes(key)
-    );
-    if (invalidFields.length > 0) {
-      res.status(400).json({
-        message: 'Invalid field(s) in update request',
-        invalidFields,
-      });
-      return;
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
     }
-    // Update only the fields provided in the request
-    Object.keys(updates).forEach((key) => {
-      profile[key] = updates[key];
-    });
-    // Save the updated profile
-    const updatedProfile = await profile.save();
-    res.status(200).json({
-      message: 'Profile updated successfully',
-      profile: updatedProfile,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-    } else {
-      console.error('Unexpected error', error);
-      res.status(500).json({
-        message: 'Server error',
-        error: 'An unexpected error occurred',
-      });
-    }
-  }
 };
 exports.updateProfile = updateProfile;

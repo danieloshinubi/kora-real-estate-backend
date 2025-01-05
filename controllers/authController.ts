@@ -4,7 +4,6 @@ import ROLES_LIST from '../config/roles_list';
 import { Novu } from '@novu/node';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 
 /**
  * @swagger
@@ -611,10 +610,117 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+/**
+ * @swagger
+ * /auth/user/changepassword:
+ *   patch:
+ *     summary: Change the user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The ID of the user whose password is being changed
+ *                 example: "60d5f7c9d7a2c943bf0ef12d"
+ *               currentPassword:
+ *                 type: string
+ *                 description: The current password of the user
+ *                 example: "oldPassword123"
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password the user wants to set
+ *                 example: "newPassword456"
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Password updated successfully"
+ *       400:
+ *         description: Bad request - current password is incorrect or other validation issues
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Current password is incorrect"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   example: "An unexpected error occurred"
+ */
+
+const changePassword = async (req: Request, res: Response): Promise<void> => {
+  const { userId, currentPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Current password is incorrect' });
+      return;
+    }
+
+    // Update password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    } else {
+      console.error('Unexpected error', error);
+      res.status(500).json({
+        message: 'Server error',
+        error: 'An unexpected error occurred',
+      });
+    }
+  }
+};
+
 export {
   handleNewUser,
   verifyAccount,
   handleLogin,
   forgotPassword,
   resetPassword,
+  changePassword
 };

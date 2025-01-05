@@ -27,9 +27,15 @@ jobs:
         run: npm install
 
       - name: Check code formatting
+        id: format-verify
         run: npm run format:verify
+        continue-on-error: true
+
+      - name: Run format if verify fails
+        if: failure() && steps.format-verify.outcome == 'failure'
+        run: npm run format
 
       - run: npm run build --if-present
 
-      # - name: Run tests
-      #   run: npm test
+      - name: Run tests
+        run: npm test
