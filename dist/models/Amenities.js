@@ -57,18 +57,20 @@ var __importStar =
   })();
 Object.defineProperty(exports, '__esModule', { value: true });
 const mongoose_1 = __importStar(require('mongoose'));
-const PropertyTypeSchema = new mongoose_1.Schema(
+const AmenitiesSchema = new mongoose_1.Schema(
   {
     name: {
       type: String,
       required: true,
       unique: true,
     },
+    icon: {
+      type: mongoose_1.Schema.Types.ObjectId,
+      ref: 'AmenityIcon',
+      required: true,
+    },
   },
   { timestamps: true }
 );
-const PropertyType = mongoose_1.default.model(
-  'PropertyType',
-  PropertyTypeSchema
-);
-exports.default = PropertyType;
+const Amenities = mongoose_1.default.model('Amenities', AmenitiesSchema);
+exports.default = Amenities;

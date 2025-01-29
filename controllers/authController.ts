@@ -722,5 +722,5 @@ export {
   handleLogin,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
 };

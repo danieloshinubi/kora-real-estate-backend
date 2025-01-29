@@ -3,8 +3,11 @@ import * as profileController from '../controllers/profileController';
 
 const router: Router = express.Router();
 
-router.post('/', profileController.createProfile);
-router.get('/:userId', profileController.getProfileByUserId);
-router.patch('/:userId', profileController.updateProfile);
+router.route('/').post(profileController.createProfile);
+
+router
+  .route('/:userId')
+  .get(profileController.getProfileByUserId)
+  .patch(profileController.updateProfile);
 
 export { router };

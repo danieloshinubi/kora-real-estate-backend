@@ -57,18 +57,30 @@ var __importStar =
   })();
 Object.defineProperty(exports, '__esModule', { value: true });
 const mongoose_1 = __importStar(require('mongoose'));
-const PropertyTypeSchema = new mongoose_1.Schema(
+const ReviewSchema = new mongoose_1.Schema(
   {
-    name: {
+    user: {
+      type: mongoose_1.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    listing: {
+      type: mongoose_1.Schema.Types.ObjectId,
+      ref: 'Listings',
+      required: true,
+    },
+    comment: {
       type: String,
       required: true,
-      unique: true,
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
     },
   },
   { timestamps: true }
 );
-const PropertyType = mongoose_1.default.model(
-  'PropertyType',
-  PropertyTypeSchema
-);
-exports.default = PropertyType;
+const Review = mongoose_1.default.model('Review', ReviewSchema);
+exports.default = Review;
