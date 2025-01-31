@@ -32,25 +32,15 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const AmenityIconSchema = new mongoose_1.Schema({
-    fileUrl: {
-        type: String,
-        required: true,
-    },
-    fileType: {
-        type: String,
-        required: true,
-    },
-    fileName: {
-        type: String,
-        required: true,
-    },
-    public_id: {
-        type: String,
-        required: true,
-    },
-}, { timestamps: true });
-const AmenityIcon = mongoose_1.default.model('AmenityIcon', AmenityIconSchema);
-exports.default = AmenityIcon;
+exports.router = void 0;
+const express_1 = __importDefault(require("express"));
+const reviewController = __importStar(require("../controllers/reviewController"));
+const router = express_1.default.Router();
+exports.router = router;
+router.route('/').post(reviewController.createReview);
+router.route('/:listingId').get(reviewController.getReviewById);
+router.route('/:id').delete(reviewController.deleteReview);
