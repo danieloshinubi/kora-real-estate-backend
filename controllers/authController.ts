@@ -716,6 +716,67 @@ const changePassword = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+/**
+ * @swagger
+ * /auth/user/logout:
+ *   get:
+ *     summary: Logs out the user by clearing the access token cookie
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ *                 error:
+ *                   type: string
+ *                   example: An unexpected error occurred
+ */
+
+const handleLogout = async (req: Request, res: Response): Promise<void> => {
+  const cookies = req.cookies;
+
+  try {
+    if (!cookies) {
+      res.status(404).json({ message: 'accessToken not detected' });
+    } else {
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+        partitioned: true,
+      });
+    }
+
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    } else {
+      console.error('Unexpected error', error);
+      res.status(500).json({
+        message: 'Server error',
+        error: 'An unexpected error occurred',
+      });
+    }
+  }
+};
+
 export {
   handleNewUser,
   verifyAccount,
@@ -723,4 +784,5 @@ export {
   forgotPassword,
   resetPassword,
   changePassword,
+  handleLogout,
 };

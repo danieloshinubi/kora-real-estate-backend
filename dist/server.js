@@ -11,12 +11,14 @@ const swaggerConfig_1 = __importDefault(require("./swaggerConfig"));
 const migrations_1 = __importDefault(require("./migrations"));
 const main_1 = require("./routes/main");
 const corsOptions_1 = __importDefault(require("./config/corsOptions"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 // Setup CORS and JSON parsing
 app.use((0, cors_1.default)(corsOptions_1.default));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+app.use((0, cookie_parser_1.default)());
 // Serve Swagger docs
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerConfig_1.default));
 // Setup routes

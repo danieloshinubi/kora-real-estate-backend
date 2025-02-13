@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.resetPassword = exports.forgotPassword = exports.handleLogin = exports.verifyAccount = exports.handleNewUser = void 0;
+exports.handleLogout = exports.changePassword = exports.resetPassword = exports.forgotPassword = exports.handleLogin = exports.verifyAccount = exports.handleNewUser = void 0;
 const User_1 = __importDefault(require("../models/User"));
 const roles_list_1 = __importDefault(require("../config/roles_list"));
 const node_1 = require("@novu/node");
@@ -665,3 +665,64 @@ const changePassword = async (req, res) => {
     }
 };
 exports.changePassword = changePassword;
+/**
+ * @swagger
+ * /auth/user/logout:
+ *   get:
+ *     summary: Logs out the user by clearing the access token cookie
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ *                 error:
+ *                   type: string
+ *                   example: An unexpected error occurred
+ */
+const handleLogout = async (req, res) => {
+    const cookies = req.cookies;
+    try {
+        if (!cookies) {
+            res.status(404).json({ message: 'accessToken not detected' });
+        }
+        else {
+            res.clearCookie('accessToken', {
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                partitioned: true,
+            });
+        }
+        res.status(200).json({ message: 'Logout successful' });
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+        else {
+            console.error('Unexpected error', error);
+            res.status(500).json({
+                message: 'Server error',
+                error: 'An unexpected error occurred',
+            });
+        }
+    }
+};
+exports.handleLogout = handleLogout;

@@ -6,6 +6,7 @@ import swaggerSpec from './swaggerConfig';
 import connectDB from './migrations';
 import { routes } from './routes/main';
 import corsOptions from './config/corsOptions';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +15,7 @@ const server = http.createServer(app);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Serve Swagger docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
