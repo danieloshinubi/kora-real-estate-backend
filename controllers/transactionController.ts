@@ -8,7 +8,7 @@ import Listings from '../models/Listings';
  * @swagger
  * tags:
  *   name: Transaction
- *   description: Authentication and registration
+ *   description: Transaction creation and history
  */
 
 const novuApiKey: string | undefined = process.env.NOVU_API_KEY;

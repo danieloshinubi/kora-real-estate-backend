@@ -12,7 +12,7 @@ const Listings_1 = __importDefault(require("../models/Listings"));
  * @swagger
  * tags:
  *   name: Transaction
- *   description: Authentication and registration
+ *   description: Transaction creation and history
  */
 const novuApiKey = process.env.NOVU_API_KEY;
 if (!novuApiKey) {
