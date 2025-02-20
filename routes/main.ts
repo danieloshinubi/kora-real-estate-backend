@@ -6,6 +6,7 @@ import { router as UserRouter } from './user';
 import { router as AmenitiesRouter } from './amenities';
 import { router as ListingRouter } from './listings';
 import { router as ReviewRouter } from './review';
+import { router as TransactionRouter } from './transaction';
 
 const routes = (app: Application): void => {
   app.use('/auth', AuthRouter);
@@ -15,6 +16,7 @@ const routes = (app: Application): void => {
   app.use('/amenities', AmenitiesRouter);
   app.use('/listings', ListingRouter);
   app.use('/review', ReviewRouter);
+  app.use('/transaction', TransactionRouter);
 };
 
 export { routes };

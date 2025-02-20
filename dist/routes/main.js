@@ -8,6 +8,7 @@ const user_1 = require("./user");
 const amenities_1 = require("./amenities");
 const listings_1 = require("./listings");
 const review_1 = require("./review");
+const transaction_1 = require("./transaction");
 const routes = (app) => {
     app.use('/auth', auth_1.router);
     app.use('/property-types', propertyType_1.router);
@@ -16,5 +17,6 @@ const routes = (app) => {
     app.use('/amenities', amenities_1.router);
     app.use('/listings', listings_1.router);
     app.use('/review', review_1.router);
+    app.use('/transaction', transaction_1.router);
 };
 exports.routes = routes;
