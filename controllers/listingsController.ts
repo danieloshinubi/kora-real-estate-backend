@@ -36,49 +36,128 @@ interface ListingType extends Document {
  *       - multipart/form-data
  *     parameters:
  *       - in: formData
- *         name: listingImg
+ *         name: name
+ *         type: string
+ *         required: true
+ *         description: The name of the listing.
+ *         example: "Luxury Beachfront Villa"
+ *       - in: formData
+ *         name: description
+ *         type: string
+ *         required: true
+ *         description: A brief description of the listing.
+ *         example: "A beautiful villa with an ocean view and private pool."
+ *       - in: formData
+ *         name: amenities
  *         type: array
  *         items:
- *           type: file
- *         description: List of images to be uploaded (max 2).
- *       - in: body
- *         name: body
- *         description: Listing details.
+ *           type: string
  *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - name
- *             - description
- *             - price
- *             - amenities
- *             - propertyType
- *           properties:
- *             name:
- *               type: string
- *               description: Name of the listing.
- *             description:
- *               type: string
- *               description: Detailed description of the listing.
- *             price:
- *               type: number
- *               format: float
- *               description: Price of the listing.
- *             amenities:
- *               type: array
- *               items:
- *                 type: string
- *               description: List of amenities associated with the listing.
- *             propertyType:
- *               type: string
- *               description: Type of property (e.g., house, apartment).
+ *         description: List of amenity IDs associated with the listing.
+ *         example: ["60d0fe4f5311236168a109ca", "60d0fe4f5311236168a109cb"]
+ *       - in: formData
+ *         name: propertyType
+ *         type: string
+ *         required: true
+ *         description: The ID of the property type.
+ *         example: "60d0fe4f5311236168a109cc"
+ *       - in: formData
+ *         name: location[longitude]
+ *         type: number
+ *         required: true
+ *         description: Longitude of the property location.
+ *         example: -74.006
+ *       - in: formData
+ *         name: location[latitude]
+ *         type: number
+ *         required: true
+ *         description: Latitude of the property location.
+ *         example: 40.7128
+ *       - in: formData
+ *         name: price
+ *         type: number
+ *         required: true
+ *         description: The price of the listing.
+ *         example: 250.99
+ *       - in: formData
+ *         name: listingImg
+ *         type: file
+ *         required: true
+ *         description: Images to upload (multiple files allowed).
+ *       - in: formData
+ *         name: rating
+ *         type: number
+ *         required: false
+ *         description: Initial rating of the listing (defaults to 0).
+ *         example: 4.5
  *     responses:
  *       201:
- *         description: Listing created successfully
+ *         description: Listing created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Listing created successfully"
+ *                 Listing:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "60d0fe4f5311236168a109cd"
+ *                     name:
+ *                       type: string
+ *                       example: "Luxury Beachfront Villa"
+ *                     description:
+ *                       type: string
+ *                       example: "A beautiful villa with an ocean view and private pool."
+ *                     amenities:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     propertyType:
+ *                       type: string
+ *                     location:
+ *                       type: object
+ *                       properties:
+ *                         longitude:
+ *                           type: number
+ *                         latitude:
+ *                           type: number
+ *                     price:
+ *                       type: number
+ *                     listingImg:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     rating:
+ *                       type: number
  *       400:
- *         description: Bad request (invalid file upload or missing required data)
+ *         description: Bad request due to missing fields or file upload errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: string
  *       500:
- *         description: Server error
+ *         description: Server error during listing creation.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   example: "An unexpected error occurred"
  */
 
 const createListing = async (req: Request, res: Response): Promise<void> => {

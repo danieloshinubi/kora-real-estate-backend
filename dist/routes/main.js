@@ -19,6 +19,6 @@ const routes = (app) => {
     app.use('/listings', listings_1.router);
     app.use('/review', review_1.router);
     app.use('/transaction', transaction_1.router);
-    app.use('/favourites', favourites_1.router);
+    app.use('/favorites', favourites_1.router);
 };
 exports.routes = routes;
