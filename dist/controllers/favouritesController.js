@@ -242,7 +242,7 @@ exports.removeFavourites = removeFavourites;
 const getFavourites = async (req, res) => {
     const { userId } = req.params;
     try {
-        const favourites = Favourites_1.default.findOne({ user: userId });
+        const favourites = await Favourites_1.default.findOne({ user: userId }).lean();
         if (!favourites) {
             res.status(404).json({ message: 'No favourites found' });
             return;

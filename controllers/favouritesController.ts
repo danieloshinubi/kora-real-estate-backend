@@ -250,7 +250,7 @@ const getFavourites = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params;
 
   try {
-    const favourites = Favourites.findOne({ user: userId });
+    const favourites = await Favourites.findOne({ user: userId }).lean();
 
     if (!favourites) {
       res.status(404).json({ message: 'No favourites found' });

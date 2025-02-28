@@ -18,7 +18,7 @@ const options = {
         },
         servers: [
             {
-                url: config.hostedUrl,
+                url: config.baseUrl,
                 description: 'Development server',
             },
         ],
