@@ -15,7 +15,8 @@ const Favourites_1 = __importDefault(require("../models/Favourites"));
  * @swagger
  * /favorites:
  *   post:
- *     summary: Add a listing to favorites
+ *     summary: Add a listing to a user's favorites
+ *     description: Allows a user to add a listing to their favorites. If the user has no existing favorites, a new record is created.
  *     tags: [Favorites]
  *     requestBody:
  *       required: true
@@ -29,13 +30,15 @@ const Favourites_1 = __importDefault(require("../models/Favourites"));
  *             properties:
  *               userId:
  *                 type: string
- *                 example: "64c9f8e3f12e4b73bced86d2"
+ *                 description: The ID of the user adding the favorite.
+ *                 example: "60d0fe4f5311236168a109cf"
  *               listingId:
  *                 type: string
- *                 example: "65a2f7e5d9c8b174e2a4e1b9"
+ *                 description: The ID of the listing being added to favorites.
+ *                 example: "60d0fe4f5311236168a109d0"
  *     responses:
  *       200:
- *         description: Listing added to favorites successfully
+ *         description: Listing added to favorites successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -45,7 +48,7 @@ const Favourites_1 = __importDefault(require("../models/Favourites"));
  *                   type: string
  *                   example: "Listing added to favorites"
  *       400:
- *         description: Listing is already in favorites
+ *         description: Listing is already in favorites.
  *         content:
  *           application/json:
  *             schema:
@@ -55,7 +58,18 @@ const Favourites_1 = __importDefault(require("../models/Favourites"));
  *                   type: string
  *                   example: "Listing already in favorites"
  *       500:
- *         description: Server error
+ *         description: Server error while adding to favorites.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   example: "An unexpected error occurred"
  */
 const addFavorites = async (req, res) => {
     const { userId, listingId } = req.body;
@@ -71,27 +85,27 @@ const addFavorites = async (req, res) => {
         else {
             // If listing is already in favorites, return a message
             if (favourites.listing.includes(listingId)) {
-                res.status(400).json({ message: 'Listing already in favorites' });
-                return;
+                return res
+                    .status(400)
+                    .json({ message: 'Listing already in favorites' });
             }
             favourites.listing.push(listingId);
         }
         await favourites.save();
+        return res
+            .status(200)
+            .json({ message: 'Listing successfully added to favorites' });
     }
     catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Server error', error: error.message });
-        }
-        else {
-            console.error('Unexpected error', error);
-            res.status(500).json({
-                message: 'Server error',
-                error: 'An unexpected error occurred',
-            });
-        }
+        console.error('Unexpected error:', error);
+        return res.status(500).json({
+            message: 'Server error',
+            error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        });
     }
 };
 exports.addFavorites = addFavorites;
+exports.default = addFavorites;
 /**
  * @swagger
  * /favorites:
@@ -178,6 +192,7 @@ exports.removeFavourites = removeFavourites;
  * /favorites/{userId}:
  *   get:
  *     summary: Get a user's favorite listings
+ *     description: Retrieves all favorite listings of a specific user.
  *     tags: [Favorites]
  *     parameters:
  *       - in: path
@@ -185,36 +200,44 @@ exports.removeFavourites = removeFavourites;
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user whose favorites are being retrieved
- *         example: "64c9f8e3f12e4b73bced86d2"
+ *         description: The ID of the user whose favorites are being retrieved.
+ *         example: "60d0fe4f5311236168a109cf"
  *     responses:
  *       200:
- *         description: Retrieved user's favorite listings successfully
+ *         description: Successfully retrieved the user's favorite listings.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         example: "65b1f5e9d4a9c3e6a8f7d5c1"
- *                       user:
- *                         type: string
- *                         example: "64c9f8e3f12e4b73bced86d2"
- *                       listing:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example: "65a2f7e5d9c8b174e2a4e1b9"
+ *                   type: object
+ *                   example:
+ *                     user: "60d0fe4f5311236168a109cf"
+ *                     listing: ["60d0fe4f5311236168a109d0", "60d0fe4f5311236168a109d1"]
  *       404:
- *         description: No favorites found for the user
+ *         description: No favorites found for the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No favourites found"
  *       500:
- *         description: Server error
+ *         description: Server error while fetching favorites.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
+ *                 error:
+ *                   type: string
+ *                   example: "An unexpected error occurred"
  */
 const getFavourites = async (req, res) => {
     const { userId } = req.params;
