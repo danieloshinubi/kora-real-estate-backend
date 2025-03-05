@@ -5,8 +5,7 @@ const allowedOrigins: string[] = [
   'http://localhost:5174',
   'https://kora-service.onrender.com',
   'https://kora-kappa.vercel.app',
-  'http://kora-rentals.vercel.app',
-  'http://kora-dun.vercel.app',
+  'https://kora-rentals.vercel.app',
 ];
 
 export default allowedOrigins;
