@@ -6,6 +6,7 @@ const allowedOrigins: string[] = [
   'https://kora-service.onrender.com',
   'https://kora-kappa.vercel.app',
   'http://kora-rentals.vercel.app',
+  'http://kora-dun.vercel.app',
 ];
 
 export default allowedOrigins;
